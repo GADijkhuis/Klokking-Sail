@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <type id="android" />
+  </component>
   <component name="GithubDefaultAccount">
     <option name="defaultAccountId" value="9cee0d96-9c71-4a45-b550-51b39f43c709" />
+  </component>
+  <component name="ProjectRootManager">
+    <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

@@ -6,6 +6,7 @@ import 'package:klokking_sail/pages/finish_view.dart';
 import 'package:klokking_sail/pages/participants_view.dart';
 import 'package:klokking_sail/pages/projects_view.dart';
 import 'package:klokking_sail/pages/result_view.dart';
+import 'package:klokking_sail/styles.dart';
 
 import 'models/project.dart';
 
@@ -21,10 +22,20 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'Klokking Sail',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        scaffoldBackgroundColor: Styles.backgroundColor,
+        appBarTheme: Styles.appBarTheme,
+        bottomNavigationBarTheme: Styles.bottomNavigationAppBarTheme,
         useMaterial3: true,
+        canvasColor: Styles.backgroundColor,
+        primaryColor: Colors.white,
+        textTheme: Styles.textTheme,
+        colorScheme: ColorScheme.dark(
+          primary: Styles.textColor,
+          onPrimary: Styles.backgroundColor,
+          surface: Styles.backgroundColor,
+          onSurface: Styles.textColor,
+        ),
       ),
-      themeMode: ThemeMode.dark,
       home: MainApp(),
     );
   }
@@ -108,6 +119,7 @@ class _MainAppState extends State<MainApp> {
     return Scaffold(
       body: _pages[_index],
       bottomNavigationBar: BottomNavigationBar(
+        showUnselectedLabels: true,
         currentIndex: _index,
         onTap: (i) => setState(() => _index = i),
         items: const [
@@ -116,6 +128,7 @@ class _MainAppState extends State<MainApp> {
           BottomNavigationBarItem(icon: Icon(Icons.flag), label: "Finish"),
           BottomNavigationBarItem(icon: Icon(Icons.score), label: "Results"),
         ],
+
       ),
     );
   }

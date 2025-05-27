@@ -67,7 +67,7 @@ class _FinishViewState extends State<FinishView> {
             onLongPress: () => {
               showDialog(context: context, builder: (BuildContext context) {
                 return AlertDialog(
-                  title: Text("Delete project?"),
+                  title: Text("Delete Race?"),
                   content: Text("Are you sure you want to delete Race ${index + 1}?"),
                   actions: [
                     TextButton(

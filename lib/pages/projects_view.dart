@@ -20,6 +20,7 @@ class ProjectsView extends StatelessWidget {
         children: projects
             .map(
               (p) => ListTile(
+                leading: selected?.id == p.id ? Icon(Icons.check) : null,
                 title: Text(p.name),
                 selected: selected?.id == p.id,
                 onTap: () => onSelect(p),

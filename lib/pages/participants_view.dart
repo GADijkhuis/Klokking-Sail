@@ -65,6 +65,44 @@ class _ParticipantsViewState extends State<ParticipantsView> {
               padding: const EdgeInsets.all(12.0),
               child: Column(
                 children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                          onPressed: () {
+                            showDialog(context: context, builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text("Delete Participant?"),
+                                content: Text("Are you sure you want to delete participant ${participant.name}?"),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () => {
+                                        Navigator.of(context).pop()
+                                      },
+                                      child: Text("Cancel")
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      _removeParticipant(index);
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Participant deleted")));
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text("Delete"),
+                                  )
+                                ],
+                              );
+                            });
+                          },
+                          child: Row(
+                            spacing: 8,
+                            children: [
+                              Icon(Icons.delete),
+                              Text("Delete")
+                            ],
+                          )
+                      ),
+                    ],
+                  ),
                   TextField(
                     decoration: InputDecoration(labelText: 'Sail Number'),
                     onChanged: (val) => participant.sailNumber = val,
@@ -81,11 +119,6 @@ class _ParticipantsViewState extends State<ParticipantsView> {
                     controller: TextEditingController(text: participant.sailingClass),
                   ),
                   SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () => _removeParticipant(index),
-                    child: Text("Remove"),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                  )
                 ],
               ),
             ),

@@ -64,6 +64,32 @@ class _FinishViewState extends State<FinishView> {
                 });
               }
             },
+            onLongPress: () => {
+              showDialog(context: context, builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text("Delete project?"),
+                  content: Text("Are you sure you want to delete Race ${index + 1}?"),
+                  actions: [
+                    TextButton(
+                        onPressed: () => {
+                          Navigator.of(context).pop()
+                        },
+                        child: Text("Cancel")
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _races.remove(_races[index]);
+                          _save();
+                        });
+                        Navigator.of(context).pop();
+                      },
+                      child: Text("Delete"),
+                    )
+                  ],
+                );
+              })
+            },
           );
         },
       ),

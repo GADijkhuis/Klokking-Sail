@@ -31,11 +31,12 @@ class App extends StatelessWidget {
         textTheme: Styles.textTheme,
         colorScheme: ColorScheme.dark(
           primary: Styles.textColor,
-          onPrimary: Styles.backgroundColor,
-          surface: Styles.backgroundColor,
+          onPrimary: Styles.backgroundSecondaryColor,
+          surface: Styles.backgroundSecondaryColor,
           onSurface: Styles.textColor,
         ),
       ),
+      debugShowCheckedModeBanner: false,
       home: MainApp(),
     );
   }
@@ -71,6 +72,9 @@ class _MainAppState extends State<MainApp> {
   Future<void> _saveProjects() async {
     final file = await FileHandler.getLocalFile("projects.json");
     await file.writeAsString(jsonEncode(projects.map((e) => e.toJson()).toList()));
+    setState(() {
+      _loadProjects();
+    });
   }
 
   void _createProject() async {
@@ -110,6 +114,7 @@ class _MainAppState extends State<MainApp> {
         selected: selectedProject,
         onSelect: (p) => setState(() => selectedProject = p),
         onCreate: _createProject,
+        onSave: _saveProjects
       ),
       ParticipantsView(project: selectedProject, onSave: _saveProjects),
       FinishView(project: selectedProject, onSave: _saveProjects),
@@ -120,6 +125,7 @@ class _MainAppState extends State<MainApp> {
       body: _pages[_index],
       bottomNavigationBar: BottomNavigationBar(
         showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
         currentIndex: _index,
         onTap: (i) => setState(() => _index = i),
         items: const [

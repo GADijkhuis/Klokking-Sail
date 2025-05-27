@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class Styles {
   static Color backgroundColor = Color.fromRGBO(30, 30, 30, 1);
+  static Color backgroundSecondaryColor = Color.fromRGBO(50, 50, 50, 1);
   static Color textColor = Colors.white;
 
   static AppBarTheme appBarTheme = AppBarTheme(
@@ -31,6 +32,7 @@ class Styles {
     labelLarge: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold),
     labelMedium: TextStyle(color: textColor, fontSize: 14),
     labelSmall: TextStyle(color: textColor, fontSize: 12),
-
   );
+
+  static EdgeInsets viewPadding = EdgeInsets.all(28);
 }

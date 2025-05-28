@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../models/participant.dart';
 import '../models/project.dart';
 
 class ResultsView extends StatelessWidget {
@@ -16,44 +16,70 @@ class ResultsView extends StatelessWidget {
 
     final participants = project!.participants;
     final races = project!.races;
-    final scores = <String, List<int>>{};
 
+    // Group participants by sailing class
+    final Map<String, List<Participant>> classGroups = {};
     for (var p in participants) {
-      scores[p.sailNumber] = [];
+      classGroups.putIfAbsent(p.sailingClass, () => []).add(p);
     }
 
-    for (var race in races) {
-      for (int i = 0; i < race.length; i++) {
-        final sailNumber = race[i];
-        if (scores.containsKey(sailNumber)) {
-          scores[sailNumber]!.add(i + 1); // Low point system
+    // Calculate results per class
+    Map<String, List<Map<String, dynamic>>> classResults = {};
+
+    classGroups.forEach((sailingClass, classParticipants) {
+      final scores = <String, List<int>>{};
+      for (var p in classParticipants) {
+        scores[p.sailNumber] = [];
+      }
+
+      for (var race in races) {
+        final classFinishers = race.where((sn) =>
+            classParticipants.any((p) => p.sailNumber == sn)).toList();
+
+        for (int i = 0; i < classFinishers.length; i++) {
+          final sailNumber = classFinishers[i];
+          if (scores.containsKey(sailNumber)) {
+            scores[sailNumber]!.add(i + 1); // Low point within class
+          }
         }
       }
-    }
 
-    final resultList = scores.entries.map((entry) {
-      final total = entry.value.fold(0, (a, b) => a + b);
-      return {
-        'sailNumber': entry.key,
-        'name': participants.firstWhere((p) => p.sailNumber == entry.key).name,
-        'total': total
-      };
-    }).toList();
 
-    resultList.sort((a, b) => (a['total'] as int).compareTo(b['total'] as int));
+      final results = scores.entries.map((entry) {
+        final total = entry.value.fold(0, (a, b) => a + b);
+        final participant = classParticipants.firstWhere((p) => p.sailNumber == entry.key);
+        return {
+          'sailNumber': entry.key,
+          'name': participant.name,
+          'total': total,
+        };
+      }).toList();
+
+      results.sort((a, b) => (a['total'] as int).compareTo(b['total'] as int));
+      classResults[sailingClass] = results;
+    });
 
     return Scaffold(
       appBar: AppBar(title: Text("Results for ${project!.name}")),
-      body: ListView.builder(
-        itemCount: resultList.length,
-        itemBuilder: (context, index) {
-          final result = resultList[index];
-          return ListTile(
-            leading: Text("${index + 1}"),
-            title: Text("${result['sailNumber']} - ${result['name']}"),
-            trailing: Text("${result['total']} pts"),
+      body: ListView(
+        children: classResults.entries.map((entry) {
+          final sailingClass = entry.key;
+          final results = entry.value;
+
+          return ExpansionTile(
+            title: Text("Class: $sailingClass"),
+            initiallyExpanded: true,
+            children: results.asMap().entries.map((e) {
+              final index = e.key;
+              final result = e.value;
+              return ListTile(
+                leading: Text("${index + 1}"),
+                title: Text("${result['sailNumber']} - ${result['name']}"),
+                trailing: Text("${result['total']} pts"),
+              );
+            }).toList(),
           );
-        },
+        }).toList(),
       ),
     );
   }

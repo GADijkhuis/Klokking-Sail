@@ -34,5 +34,5 @@ class Styles {
     labelSmall: TextStyle(color: textColor, fontSize: 12),
   );
 
-  static EdgeInsets viewPadding = EdgeInsets.all(28);
+  static const double baseViewPadding = 16.0;
 }

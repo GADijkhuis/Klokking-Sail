@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/participant.dart';
 import '../models/project.dart';
+import '../styles.dart';
 
 class ResultsView extends StatelessWidget {
   final Project? project;
@@ -60,24 +61,34 @@ class ResultsView extends StatelessWidget {
     });
 
     return Scaffold(
-      appBar: AppBar(title: Text("Results for ${project!.name}")),
+      appBar: AppBar(title: Text("Results")),
       body: ListView(
         children: classResults.entries.map((entry) {
           final sailingClass = entry.key;
           final results = entry.value;
 
-          return ExpansionTile(
-            title: Text("Class: $sailingClass"),
-            initiallyExpanded: true,
-            children: results.asMap().entries.map((e) {
-              final index = e.key;
-              final result = e.value;
-              return ListTile(
-                leading: Text("${index + 1}"),
-                title: Text("${result['sailNumber']} - ${result['name']}"),
-                trailing: Text("${result['total']} pts"),
-              );
-            }).toList(),
+          return Card(
+            margin: EdgeInsets.only(left: Styles.baseViewPadding, right: Styles.baseViewPadding, top: Styles.baseViewPadding),
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                dividerColor: Colors.transparent
+              ),
+              child: ExpansionTile(
+                title: Text("Class: $sailingClass"),
+                initiallyExpanded: true,
+                tilePadding: EdgeInsets.only(left: Styles.baseViewPadding, right: Styles.baseViewPadding),
+                childrenPadding: EdgeInsets.zero,
+                children: results.asMap().entries.map((e) {
+                  final index = e.key;
+                  final result = e.value;
+                  return ListTile(
+                    leading: Text("${index + 1}"),
+                    title: Text("${result['sailNumber']} - ${result['name']}"),
+                    trailing: Text("${result['total']} pts"),
+                  );
+                }).toList(),
+              ),
+            ),
           );
         }).toList(),
       ),

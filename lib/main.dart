@@ -85,6 +85,7 @@ class _MainAppState extends State<MainApp> {
         title: Text("Create Project"),
         content: TextField(controller: nameController, decoration: InputDecoration(labelText: "Project Name")),
         actions: [
+          TextButton(onPressed: () => { Navigator.pop(context) }, child: Text("Cancel")),
           TextButton(
               onPressed: () {
                 if (nameController.text.isNotEmpty) {
@@ -132,7 +133,7 @@ class _MainAppState extends State<MainApp> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Projects"),
           BottomNavigationBarItem(icon: Icon(Icons.group), label: "Participants"),
           BottomNavigationBarItem(icon: Icon(Icons.flag), label: "Finish"),
-          BottomNavigationBarItem(icon: Icon(Icons.score), label: "Results"),
+          BottomNavigationBarItem(icon: Icon(Icons.leaderboard), label: "Results"),
         ],
 
       ),

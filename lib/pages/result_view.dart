@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/participant.dart';
 import '../models/project.dart';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../styles.dart';
 
 class ResultsView extends StatelessWidget {
   final Project? project;
-  final int discardEvery; // e.g. 5 means 1 discard per 5 races
+  final int discardEvery;
 
   ResultsView({required this.project, this.discardEvery = 5});
 
@@ -31,21 +30,18 @@ class ResultsView extends StatelessWidget {
       }
 
       for (var race in races) {
-        // Filter only sail numbers in this class that finished this race
         final classFinishers =
         race.where((sn) => classParticipants.any((p) => p.sailNumber == sn)).toList();
 
         for (int i = 0; i < classFinishers.length; i++) {
           final sailNumber = classFinishers[i];
           if (scores.containsKey(sailNumber)) {
-            scores[sailNumber]!.add(i + 1); // Position = score
+            scores[sailNumber]!.add(i + 1);
           }
         }
 
-        // For participants that did NOT start/finish in this race, assign max points (DNF etc)
         for (var p in classParticipants) {
           if (!classFinishers.contains(p.sailNumber)) {
-            // Usually in sailing scoring: number of finishers + 1 points for DNF/DSQ
             final dnfScore = classFinishers.length + 1;
             scores[p.sailNumber]!.add(dnfScore);
           }
@@ -56,16 +52,13 @@ class ResultsView extends StatelessWidget {
         final participantScores = entry.value.toList();
         final rawTotal = participantScores.fold(0, (a, b) => a + b);
 
-        // Calculate how many discards allowed
         final discards = discardEvery > 0 && participantScores.length >= discardEvery
             ? (participantScores.length ~/ discardEvery)
             : 0;
 
-        // Sort scores ascending to find worst scores (highest points)
         final sortedScoresDesc = List<int>.from(participantScores)
           ..sort((a, b) => b.compareTo(a));
 
-        // Worst scores to discard (highest points)
         final discardedScores = sortedScoresDesc.take(discards).toList();
 
         final netTotal = rawTotal - discardedScores.fold(0, (a, b) => a + b);

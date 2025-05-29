@@ -12,6 +12,7 @@ class RaceEditorView extends StatefulWidget {
 }
 
 class _RaceEditorState extends State<RaceEditorView> {
+  bool locked = true;
   List<String> entries = [];
   String? selected;
   final List<String> statusOptions = ['DQ', 'OCS', 'DNS', 'DNF'];
@@ -88,6 +89,8 @@ class _RaceEditorState extends State<RaceEditorView> {
           Expanded(
             child: ReorderableListView(
               onReorder: (oldIndex, newIndex) {
+                if (locked) return;
+
                 setState(() {
                   if (newIndex > oldIndex) newIndex--;
                   final item = entries.removeAt(oldIndex);
@@ -116,7 +119,18 @@ class _RaceEditorState extends State<RaceEditorView> {
               bottom: 48,
             ),
             child: Column(
+              spacing: Styles.baseViewPadding,
               children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      locked = !locked;
+                    });
+                  },
+                  icon: Icon(locked ? Icons.lock_outline : Icons.lock_open_outlined),
+                  label: Text(locked ? "Positions locked" : "Positions unlocked"),
+                  style: ElevatedButton.styleFrom(minimumSize: Size.fromHeight(48)),
+                ),
                 ElevatedButton.icon(
                   onPressed: () {
                     Navigator.pop(context, entries);

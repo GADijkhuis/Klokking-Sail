@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-
 import '../styles.dart';
 
 class RaceEditorView extends StatefulWidget {
   final List<String> sailNumbers;
   final List<String> entries;
-  final VoidCallback onSave;
 
-  RaceEditorView({required this.sailNumbers, required this.entries, required this.onSave});
+  RaceEditorView({required this.sailNumbers, required this.entries});
 
   @override
   _RaceEditorState createState() => _RaceEditorState();
@@ -16,6 +14,7 @@ class RaceEditorView extends StatefulWidget {
 class _RaceEditorState extends State<RaceEditorView> {
   List<String> entries = [];
   String? selected;
+  final List<String> statusOptions = ['DQ', 'OCS', 'DNS', 'DNF'];
 
   @override
   void initState() {
@@ -32,6 +31,18 @@ class _RaceEditorState extends State<RaceEditorView> {
     }
   }
 
+  void _addStatus(String status) {
+    if (selected != null) {
+      final labeled = "$status-${selected!}";
+      if (!entries.contains(labeled)) {
+        setState(() {
+          entries.add(labeled);
+          selected = null;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,23 +54,33 @@ class _RaceEditorState extends State<RaceEditorView> {
           Padding(
             padding: const EdgeInsets.all(Styles.baseViewPadding),
             child: Row(
-              spacing: Styles.baseViewPadding,
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: selected,
                     hint: Text("Select Sail Number"),
                     items: widget.sailNumbers
-                        .where((s) => !entries.contains(s))
+                        .where((s) => !entries.contains(s) &&
+                        statusOptions.every((status) =>
+                        !entries.contains("$status-$s")))
                         .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                         .toList(),
                     onChanged: (val) => setState(() => selected = val),
                   ),
                 ),
+                SizedBox(width: Styles.baseViewPadding),
                 ElevatedButton.icon(
+                  icon: Icon(Icons.add),
                   label: Text("Add"),
-                    icon: Icon(Icons.add), 
-                    onPressed: _addEntry
+                  onPressed: _addEntry,
+                ),
+                PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert),
+                  tooltip: "Add status",
+                  onSelected: _addStatus,
+                  itemBuilder: (context) => statusOptions
+                      .map((s) => PopupMenuItem(value: s, child: Text(s)))
+                      .toList(),
                 )
               ],
             ),
@@ -88,19 +109,24 @@ class _RaceEditorState extends State<RaceEditorView> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(left: Styles.baseViewPadding, right: Styles.baseViewPadding, top: Styles.baseViewPadding, bottom: 48),
+            padding: EdgeInsets.only(
+              left: Styles.baseViewPadding,
+              right: Styles.baseViewPadding,
+              top: Styles.baseViewPadding,
+              bottom: 48,
+            ),
             child: Column(
               children: [
-                
-
                 ElevatedButton.icon(
-                  onPressed: () => Navigator.pop(context, entries),
+                  onPressed: () {
+                    Navigator.pop(context, entries);
+                  },
                   icon: Icon(Icons.save_alt),
                   label: Text("Save & Exit"),
                   style: ElevatedButton.styleFrom(minimumSize: Size.fromHeight(48)),
                 ),
               ],
-            )
+            ),
           )
         ],
       ),

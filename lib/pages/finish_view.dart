@@ -111,7 +111,6 @@ class _FinishViewState extends State<FinishView> {
                           builder: (_) => RaceEditorView(
                             sailNumbers: _sailNumbers,
                             entries: _races[index],
-                            onSave: _save,
                           ),
                         ),
                       );
@@ -119,7 +118,9 @@ class _FinishViewState extends State<FinishView> {
                         setState(() {
                           _races[index] = result;
                         });
+                        Future.microtask(() => _save());
                       }
+
                     },
                     onLongPress: () => {
                       showDialog(context: context, builder: (BuildContext context) {

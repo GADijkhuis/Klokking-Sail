@@ -11,6 +11,8 @@ class ResultsView extends StatelessWidget {
 
   ResultsView({required this.project, this.discardEvery = 5});
 
+  static const List<String> statusOptions = ['DQ', 'OCS', 'DNS', 'DNF'];
+
   Map<String, List<Map<String, dynamic>>> calculateResults(
       Project project,
       List<Participant> participants,
@@ -24,44 +26,59 @@ class ResultsView extends StatelessWidget {
     final classResults = <String, List<Map<String, dynamic>>>{};
 
     classGroups.forEach((sailingClass, classParticipants) {
-      final scores = <String, List<int>>{};
+      final scores = <String, List<Map<String, dynamic>>>{};
       for (var p in classParticipants) {
         scores[p.sailNumber] = [];
       }
 
       for (var race in races) {
-        final classFinishers =
-        race.where((sn) => classParticipants.any((p) => p.sailNumber == sn)).toList();
-
-        for (int i = 0; i < classFinishers.length; i++) {
-          final sailNumber = classFinishers[i];
-          if (scores.containsKey(sailNumber)) {
-            scores[sailNumber]!.add(i + 1);
-          }
-        }
+        final classFinishers = race.where((sn) => classParticipants.any((p) => sn.contains(p.sailNumber))).toList();
 
         for (var p in classParticipants) {
-          if (!classFinishers.contains(p.sailNumber)) {
-            final dnfScore = classFinishers.length + 1;
-            scores[p.sailNumber]!.add(dnfScore);
+          final entry = classFinishers.firstWhere(
+                (sn) => sn.contains(p.sailNumber),
+            orElse: () => '',
+          );
+
+          if (entry.isEmpty) {
+            scores[p.sailNumber]!.add({
+              'points': classFinishers.length + 1,
+              'status': 'DNF'
+            });
+            continue;
           }
+
+          final parts = entry.split('-');
+          final sailNumber = parts.last;
+          final status = statusOptions.firstWhere(
+                (s) => entry.startsWith("$s-"),
+            orElse: () => "",
+          );
+
+          final pos = classFinishers.indexOf(entry);
+          final points = status != "" ? classFinishers.length + 1 : pos + 1;
+
+          scores[sailNumber]!.add({
+            'points': points,
+            'status': status,
+          });
         }
       }
 
       final results = scores.entries.map((entry) {
-        final participantScores = entry.value.toList();
-        final rawTotal = participantScores.fold(0, (a, b) => a + b);
+        final participantScores = entry.value;
+        final rawTotal = participantScores.fold(0, (a, b) => a + (b['points'] as int));
 
         final discards = discardEvery > 0 && participantScores.length >= discardEvery
             ? (participantScores.length ~/ discardEvery)
             : 0;
 
-        final sortedScoresDesc = List<int>.from(participantScores)
-          ..sort((a, b) => b.compareTo(a));
+        final sortedScoresDesc = List<Map<String, dynamic>>.from(participantScores)
+          ..sort((a, b) => (b['points'] as int).compareTo(a['points'] as int));
 
         final discardedScores = sortedScoresDesc.take(discards).toList();
 
-        final netTotal = rawTotal - discardedScores.fold(0, (a, b) => a + b);
+        final netTotal = rawTotal - discardedScores.fold(0, (a, b) => a + (b['points'] as int));
 
         final participant = classParticipants.firstWhere((p) => p.sailNumber == entry.key);
 
@@ -82,7 +99,6 @@ class ResultsView extends StatelessWidget {
     return classResults;
   }
 
-
   Future<void> _generatePdf(BuildContext context) async {
     if (project == null) return;
 
@@ -94,6 +110,7 @@ class ResultsView extends StatelessWidget {
 
     pdf.addPage(
       pw.MultiPage(
+        orientation: pw.PageOrientation.landscape,
         build: (context) => [
           pw.Center(
             child: pw.Text("Uitslagen",
@@ -133,8 +150,8 @@ class ResultsView extends StatelessWidget {
                 final index = e.key;
                 final r = e.value;
 
-                final scores = r['scores'] as List<int>;
-                final discarded = r['discarded'] as List<int>;
+                final scores = r['scores'] as List<Map<String, dynamic>>;
+                final discarded = r['discarded'] as List<Map<String, dynamic>>;
 
                 return pw.Row(children: [
                   pw.Expanded(flex: 1, child: pw.Text("${index + 1}")),
@@ -143,14 +160,16 @@ class ResultsView extends StatelessWidget {
                   ...List.generate(totalRaces, (i) {
                     if (i < scores.length) {
                       final score = scores[i];
+                      final points = score['points'];
+                      final status = score['status'];
+                      final display = status != "" ? "$points ($status)" : "$points";
+                      final isDiscarded = discarded.contains(score);
                       return pw.Expanded(
                         flex: 1,
                         child: pw.Text(
-                          "$score",
+                          display,
                           style: pw.TextStyle(
-                            decoration: discarded.contains(score)
-                                ? pw.TextDecoration.lineThrough
-                                : null,
+                            decoration: isDiscarded ? pw.TextDecoration.lineThrough : null,
                           ),
                         ),
                       );
@@ -173,7 +192,6 @@ class ResultsView extends StatelessWidget {
       onLayout: (format) async => pdf.save(),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {

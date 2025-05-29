@@ -111,6 +111,7 @@ class _FinishViewState extends State<FinishView> {
                           builder: (_) => RaceEditorView(
                             sailNumbers: _sailNumbers,
                             entries: _races[index],
+                            onSave: _save,
                           ),
                         ),
                       );

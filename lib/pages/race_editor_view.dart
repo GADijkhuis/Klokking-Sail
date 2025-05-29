@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../styles.dart';
+
 class RaceEditorView extends StatefulWidget {
   final List<String> sailNumbers;
   final List<String> entries;
+  final VoidCallback onSave;
 
-  RaceEditorView({required this.sailNumbers, required this.entries});
+  RaceEditorView({required this.sailNumbers, required this.entries, required this.onSave});
 
   @override
   _RaceEditorState createState() => _RaceEditorState();
@@ -34,18 +37,13 @@ class _RaceEditorState extends State<RaceEditorView> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Edit Race Entries"),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.check),
-            onPressed: () => Navigator.pop(context, entries),
-          )
-        ],
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(Styles.baseViewPadding),
             child: Row(
+              spacing: Styles.baseViewPadding,
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
@@ -58,7 +56,11 @@ class _RaceEditorState extends State<RaceEditorView> {
                     onChanged: (val) => setState(() => selected = val),
                   ),
                 ),
-                IconButton(icon: Icon(Icons.add), onPressed: _addEntry)
+                ElevatedButton.icon(
+                  label: Text("Add"),
+                    icon: Icon(Icons.add), 
+                    onPressed: _addEntry
+                )
               ],
             ),
           ),
@@ -84,6 +86,21 @@ class _RaceEditorState extends State<RaceEditorView> {
                   )
               ],
             ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: Styles.baseViewPadding, right: Styles.baseViewPadding, top: Styles.baseViewPadding, bottom: 48),
+            child: Column(
+              children: [
+                
+
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.pop(context, entries),
+                  icon: Icon(Icons.save_alt),
+                  label: Text("Save & Exit"),
+                  style: ElevatedButton.styleFrom(minimumSize: Size.fromHeight(48)),
+                ),
+              ],
+            )
           )
         ],
       ),

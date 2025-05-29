@@ -64,7 +64,20 @@ class _MainAppState extends State<MainApp> {
       final data = jsonDecode(await file.readAsString());
       setState(() {
         projects = (data as List).map((e) => Project.fromJson(e)).toList();
-        if (projects.isNotEmpty) selectedProject = projects.first;
+
+        if (projects.isEmpty) {
+          return;
+        }
+
+        if (selectedProject == null) {
+          selectedProject = projects.first;
+        } else {
+          final selectedId = selectedProject!.id;
+          selectedProject = projects.firstWhere(
+                (p) => p.id == selectedId,
+            orElse: () => selectedProject = projects.first
+          );
+        }
       });
     }
   }
